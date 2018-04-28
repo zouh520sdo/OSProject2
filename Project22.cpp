@@ -12,6 +12,14 @@ struct Process {
 	int arr_time;
 	int run_time;
 };
+void remove(vector<char> &memo, struct Process p) {
+
+	for (int i = 0; i < portions.size(); i++) {
+		if (memo[i] == p.ID) {
+			memo[i] = '.';
+		}
+	}
+}
 void nextfit(vector<int> portions, vector<char> &memo, struct Process p) {
 	
 	for (int i = 0; i < portions.size(); i += 2) {
