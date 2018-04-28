@@ -127,6 +127,7 @@ void NonContiguous(vector<char> frames, vector<Process> inputProcs) {
 	int t = 0;
 
 	vector<int> portions = findFreePortions(frames, 10);
+
 	for (int i = 0; i < portions.size(); i+=2) {
 		cout << "portion " << portions[i] << " " << portions[i + 1] << endl;
 	}
@@ -147,6 +148,88 @@ void NonContiguous(vector<char> frames, vector<Process> inputProcs) {
 		t += next_t;
 	}
 }
+
+bool isFramesEnough(vector<char>& frames, Process p) {
+	int count = 0;
+	for (int i = 0; i < frames.size(); i++) {
+		if (frames[i] == '.') {
+			count++;
+		}
+	}
+	return count >= p.mem;
+}
+
+void noncontipush(std::vector<char> &memo, char a, int max) {
+	int count = 0;
+	for (unsigned int i = 0; i<memo.size(); i++) {
+		if (memo[i] == '.') {
+			memo[i] = a;
+			count++;
+			if (count == max) break;
+		}
+	}
+}
+
+
+
+int defrag(std::vector<char> &memo) {
+	int result = 0;
+	int empty = 0;
+	bool collect = true;
+	int notempty = 0;
+	std::vector<int> e;
+	std::vector<int> note;
+
+	for (unsigned int i = 0; i<memo.size(); i++) {
+		if (memo[i] != '.' && collect == true) {
+			e.push_back(empty);
+			collect = false;
+			empty = 0;
+		}
+		else if (memo[i] == '.') {
+			collect = true;
+			empty++;
+		}
+	}
+	collect = true;
+	for (unsigned int i = 0; i<memo.size(); i++) {
+		if ((memo[i] == '.' && collect == true)) {
+			note.push_back(notempty);
+			collect = false;
+			notempty = 0;
+		}
+		else if (memo[i] != '.' && i != memo.size() - 1) {
+			collect = true;
+			notempty++;
+		}
+		else if (memo[i] != '.' && i == memo.size() - 1) {
+			collect = true;
+			notempty++;
+			note.push_back(notempty);
+		}
+	}
+
+	for (unsigned int i = 1; i<e.size(); i++) {
+		e[i] += e[i - 1];
+	}
+	for (unsigned int i = 0; i<note.size(); i++) {
+		std::cout << e[i] << std::endl;
+		result += e[i] * note[i];
+	}
+
+	std::vector<char> copy;
+	for (unsigned int i = 0; i<memo.size(); i++) {
+		if (memo[i] != '.') {
+			copy.push_back(memo[i]);
+		}
+	}
+	while (copy.size() != memo.size()) {
+		copy.push_back('.');
+	}
+	memo = copy;
+	return result;
+}
+
 
 int main(int argc, char** argv) 
 {

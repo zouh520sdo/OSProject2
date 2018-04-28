@@ -40,21 +40,17 @@ int defrag(std::vector<char> &memo){
     for (unsigned int i=0;i<memo.size();i++){
         if ((memo[i]=='.' && collect==true)){
             note.push_back(notempty);
-            std::cout<<notempty<<"gg\n";
             collect=false;
             notempty=0;
         }
         else if (memo[i]!='.' && i!=memo.size()-1){
-            std::cout<<memo[i]<<"dsdsgg\n";
             collect=true;
             notempty++;
         }
         else if (memo[i]!='.' && i==memo.size()-1 ){
-            std::cout<<memo[i]<<"dsdsdsdsdsdsgg\n";
             collect=true;
             notempty++;
             note.push_back(notempty);
-            std::cout<<notempty<<"gfdfdg\n";
         }
     }
     
@@ -62,12 +58,10 @@ int defrag(std::vector<char> &memo){
         e[i]+=e[i-1];
     }
     for (unsigned int i=0;i<note.size();i++){
+		std::cout << e[i] << std::endl;
         result+=e[i]*note[i];
     }
-    
-    
-    
-    
+
     std::vector<char> copy;
     for (unsigned int i=0;i<memo.size();i++){
         if (memo[i]!='.'){
@@ -79,26 +73,26 @@ int defrag(std::vector<char> &memo){
     }
     memo=copy;
     return result;
-    
 }
 void noncontipush(std::vector<char> &memo,char a,int max){
     int count=0;
     for (unsigned int i=0;i<memo.size();i++){
-       if (memo[i]!='.'){
+       if (memo[i]=='.'){
            memo[i]=a;
            count++;
            if (count==max) break;
         }
     }
-    
 }
+
 int main ()
 {
   // constructors used in the same order as described above:
   
-    std::vector<char> memo={'a','.','b','.','.','n','.','.'};
+    std::vector<char> memo={'a','.','b','.','.','n','.','.','b','.','c','n','b','.','.','n' };
     int d=defrag(memo);
     print(memo);
     std::cout<<d;
     return 0;
 }
+
