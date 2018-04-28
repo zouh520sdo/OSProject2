@@ -30,7 +30,7 @@ void bestfit(vector<int> portions, vector<char> &memo, struct Process p) {
 	for (int i = 0; i < portions.size(); i += 2) {
 		if (portions[i + 1] - portion[i] + 1 < best_portions[i + 1] - best_portion[i] + 1) {
 			best_portions[i + 1] = portions[i + 1];
-			best_portions[i] = portion[i];
+			best_portions[i] = portions[i];
 		}
 	}
 	for (int j = best_portions[i]; j < best_portions[i]+p.mem; j++) {
