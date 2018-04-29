@@ -204,8 +204,9 @@ bool isFramesEnough(vector<char>& frames, Process p) {
 	return count >= p.mem;
 }
 
-void noncontipush(std::vector<char> &memo, char a, int max) {
+vector<int> noncontipush(std::vector<char> &memo, char a, int max) {
 	int count = 0;
+	vector<int> map;
 	for (unsigned int i = 0; i<memo.size(); i++) {
 		if (memo[i] == '.') {
 			memo[i] = a;
@@ -213,6 +214,15 @@ void noncontipush(std::vector<char> &memo, char a, int max) {
 			if (count == max) break;
 		}
 	}
+	int keep = 0;
+	for (unsigned int i = 0; i<memo.size(); i++) {
+		if (memo[i] == a) {
+			map.push_back(keep);
+			map.push_back(i);
+			
+		}
+	}
+	return map;
 }
 
 
