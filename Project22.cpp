@@ -219,6 +219,7 @@ vector<int> noncontipush(std::vector<char> &memo, char a, int max) {
 		if (memo[i] == a) {
 			map.push_back(keep);
 			map.push_back(i);
+			keep++;
 			
 		}
 	}
