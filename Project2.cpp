@@ -181,13 +181,15 @@ vector<int> noncontipush(std::vector<char> &memo, char a, int max) {
 	return map;
 }
 
-void nextfit(vector<int> portions, vector<char> &memo, Process p) {
-	for (int j = portions[portions.size()-2]; j < p.mem + portions[portions.size() - 2]; j++) {
+int nextfit(vector<int> portions, vector<char> &memo, Process p) {
+	int j = 0;
+	for (j = portions[0]; j < p.mem + portions[0]; j++) {
 		memo[j] = p.ID;
 	}
+	return j;
 }
 
-void bestfit(vector<int> portions, vector<char> &memo, Process p) {
+int bestfit(vector<int> portions, vector<char> &memo, Process p) {
 	vector<int> best_portions;
 	best_portions.push_back(portions[0]);
 	best_portions.push_back(portions[1]);
@@ -200,9 +202,10 @@ void bestfit(vector<int> portions, vector<char> &memo, Process p) {
 	for (int j = best_portions[0]; j < best_portions[0] + p.mem; j++) {
 		memo[j] = p.ID;
 	}
+	return 0;
 }
 
-void worstfit(vector<int> portions, vector<char> &memo, Process p) {
+int worstfit(vector<int> portions, vector<char> &memo, Process p) {
 	vector<int> best_portions;
 	best_portions.push_back(portions[0]);
 	best_portions.push_back(portions[1]);
@@ -215,6 +218,7 @@ void worstfit(vector<int> portions, vector<char> &memo, Process p) {
 	for (int j = best_portions[0]; j < best_portions[0] + p.mem; j++) {
 		memo[j] = p.ID;
 	}
+	return 0;
 }
 
 
@@ -285,6 +289,38 @@ int defrag(std::vector<char> &memo, vector<char>& moved) {
 	return result;
 }
 
+vector<int> reArrangePortions(vector<int> portions, int recentIndex, int length) {
+	int newS = -1;
+	int newE = -1;
+	for (int i = 0; i < portions.size(); i += 2) {
+		if (portions[i] <= recentIndex && recentIndex <= portions[i + 1]) {
+			newS = recentIndex;
+			newE = portions[i + 1];
+			if (newE - newS + 1 >= length) {
+				portions.insert(portions.begin() + (i + 2), newE);
+				portions.insert(portions.begin() + (i + 2), newS);
+			}
+			break;
+		}
+	}
+
+	vector<int> newPortions;
+	int startI = 0;
+	for (int i = 0; i < portions.size(); i+=2) {
+		if (recentIndex <= portions[i]) {
+			startI = i;
+			break;
+		}
+	}
+
+	for (int i = 0; i < portions.size(); i += 2) {
+		newPortions.push_back(portions[(i + startI) % portions.size()]);
+		newPortions.push_back(portions[(i + startI + 1) % portions.size()]);
+	}
+
+	return newPortions;
+}
+
 void NonContiguous(vector<char> frames, vector<Process> inputProcs, int framesPerLine) {
 	vector<Process> arrivalProcs = inputProcs;
 	vector<Process> runningProcs;
@@ -349,7 +385,7 @@ void NonContiguous(vector<char> frames, vector<Process> inputProcs, int framesPe
 	cout << "time " << t << "ms: Simulator ended (Non-contiguous)" << endl;
 }
 
-void Contiguous(vector<char> frames, vector<Process> inputProcs, int framesPerLine, int t_movetime, void(fitfunc(vector<int> portions, vector<char> &memo, Process p))) {
+void Contiguous(vector<char> frames, vector<Process> inputProcs, int framesPerLine, int t_movetime, int(fitfunc(vector<int> portions, vector<char> &memo, Process p))) {
 	vector<Process> arrivalProcs = inputProcs;
 	vector<Process> runningProcs;
 	int t = 0;
@@ -423,9 +459,14 @@ void Contiguous(vector<char> frames, vector<Process> inputProcs, int framesPerLi
 						printFrames(frames, framesPerLine);
 						portions = findFreePortions(frames, p.mem);
 					}
+
+					if (fitfunc == nextfit) {
+						portions = reArrangePortions(portions, recentIndex, p.mem);
+					}
+
 					runningProcs.push_back(p);
 					sort(runningProcs.begin(), runningProcs.end(), procCmpRunFunction);
-					fitfunc(portions, frames, p);
+					recentIndex = fitfunc(portions, frames, p);
 					/* print arrival msg */
 					cout << "time " << t << "ms: Placed process " << p.ID << ":" << endl;
 					printFrames(frames, framesPerLine);
