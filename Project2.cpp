@@ -1,3 +1,9 @@
+/*
+
+This OS project is joint work by Huang Zou (zouh) and Minh Pham (phamm)
+
+*/
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -5,6 +11,9 @@
 #include <sstream>
 #include <algorithm>
 #include <map>
+#include <limits.h>
+#include <string.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -31,14 +40,13 @@ void split(const string& s, char delim, vector<string>& v) {
 void split(const string &s, const char* delim, vector<string> & v) {
 	// to avoid modifying original string
 	// first duplicate the original string and return a char pointer then free the memory
-	char * dup = _strdup(s.c_str());
-	char * next_token;
-	char * token = strtok_s(dup, delim, &next_token);
+	char * dup = strdup(s.c_str());
+	char * token = strtok(dup, delim);
 	while (token != NULL) {
 		v.push_back(string(token));
 		// the call is treated as a subsequent calls to strtok:
 		// the function continues from where it left in previous invocation
-		token = strtok_s(NULL, delim, &next_token);
+		token = strtok(NULL, delim);
 	}
 	free(dup);
 }
@@ -67,7 +75,7 @@ vector<Process> readInputFile(string inputFile) {
 		split(line, "/ ", output);
 		char id = output[0][0];
 		int mem_time = stoi(output[1]);
-		for (int i = 2; i < output.size(); i+=2) {
+		for (unsigned int i = 2; i < output.size(); i+=2) {
 			Process proc;
 			proc.ID = id;
 			proc.mem = mem_time;
@@ -86,7 +94,7 @@ vector<int> findFreePortions(vector<char> frames, int length) {
 	int start = -1;
 	int end = -1;
 	int i = 0;
-	for (; i < frames.size(); i++) {
+	for (; i < (int)frames.size(); i++) {
 		if (start == -1 && frames[i] == '.') {
 			start = i;
 		}
@@ -114,7 +122,7 @@ void printFrames(vector<char> frames, int framesPerLine) {
 		cout << '=';
 	}
 	cout << endl;
-	for (int i = 0; i < frames.size(); i++) {
+	for (unsigned int i = 0; i < frames.size(); i++) {
 		if (i!=0 && i % framesPerLine == 0) {
 			cout << endl;
 		}
@@ -133,7 +141,7 @@ void printPageTable(map<char, vector<int>> table) {
 		cout << it->first << ":";
 		vector<int> pages = it->second;
 		int c = 0;
-		for (int i = 0; i < pages.size(); i+=2) {
+		for (unsigned int i = 0; i < pages.size(); i+=2) {
 			if (c != 0 && c % 10 == 0) {
 				cout << endl;
 			}
@@ -149,7 +157,7 @@ void printPageTable(map<char, vector<int>> table) {
 
 bool isFramesEnough(vector<char>& frames, Process p) {
 	int count = 0;
-	for (int i = 0; i < frames.size(); i++) {
+	for (unsigned int i = 0; i < frames.size(); i++) {
 		if (frames[i] == '.') {
 			count++;
 		}
@@ -159,7 +167,7 @@ bool isFramesEnough(vector<char>& frames, Process p) {
 
 void removeProc(vector<char> &memo, Process p) {
 
-	for (int i = 0; i < memo.size(); i++) {
+	for (unsigned int i = 0; i < memo.size(); i++) {
 		if (memo[i] == p.ID) {
 			memo[i] = '.';
 		}
@@ -193,7 +201,7 @@ int bestfit(vector<int> portions, vector<char> &memo, Process p) {
 	vector<int> best_portions;
 	best_portions.push_back(portions[0]);
 	best_portions.push_back(portions[1]);
-	for (int i = 0; i < portions.size(); i += 2) {
+	for (unsigned int i = 0; i < portions.size(); i += 2) {
 		if (portions[i + 1] - portions[i] + 1 < best_portions[1] - best_portions[0] + 1) {
 			best_portions[1] = portions[i + 1];
 			best_portions[0] = portions[i];
@@ -209,7 +217,7 @@ int worstfit(vector<int> portions, vector<char> &memo, Process p) {
 	vector<int> best_portions;
 	best_portions.push_back(portions[0]);
 	best_portions.push_back(portions[1]);
-	for (int i = 0; i < portions.size(); i += 2) {
+	for (unsigned int i = 0; i < portions.size(); i += 2) {
 		if (portions[i + 1] - portions[i] + 1 > best_portions[1] - best_portions[0] + 1) {
 			best_portions[1] = portions[i + 1];
 			best_portions[0] = portions[i];
@@ -258,11 +266,6 @@ int defrag(std::vector<char> &memo, vector<char>& moved) {
 			note.push_back(notempty);
 		}
 	}
-	for (unsigned int i = 0; i<note.size(); i++) {
-		if (e[i] != 0) {
-			result += note[i];
-		}
-	}
 
 	std::vector<char> copy;
 	char movePro = memo.front();
@@ -275,6 +278,10 @@ int defrag(std::vector<char> &memo, vector<char>& moved) {
 
 		if (!startmove && memo[i] == '.') {
 			startmove = true;
+		}
+
+		if (startmove && memo[i] != '.') {
+			result++;
 		}
 
 		if (startmove && movePro != memo[i] && memo[i] != '.') {
@@ -292,7 +299,7 @@ int defrag(std::vector<char> &memo, vector<char>& moved) {
 vector<int> reArrangePortions(vector<int> portions, int recentIndex, int length) {
 	int newS = -1;
 	int newE = -1;
-	for (int i = 0; i < portions.size(); i += 2) {
+	for (unsigned int i = 0; i < portions.size(); i += 2) {
 		if (portions[i] <= recentIndex && recentIndex <= portions[i + 1]) {
 			newS = recentIndex;
 			newE = portions[i + 1];
@@ -306,14 +313,14 @@ vector<int> reArrangePortions(vector<int> portions, int recentIndex, int length)
 
 	vector<int> newPortions;
 	int startI = 0;
-	for (int i = 0; i < portions.size(); i+=2) {
+	for (unsigned int i = 0; i < portions.size(); i+=2) {
 		if (recentIndex <= portions[i]) {
 			startI = i;
 			break;
 		}
 	}
 
-	for (int i = 0; i < portions.size(); i += 2) {
+	for (unsigned int i = 0; i < portions.size(); i += 2) {
 		newPortions.push_back(portions[(i + startI) % portions.size()]);
 		newPortions.push_back(portions[(i + startI + 1) % portions.size()]);
 	}
@@ -343,7 +350,7 @@ void NonContiguous(vector<char> frames, vector<Process> inputProcs, int framesPe
 
 		if (!runningProcs.empty()) {
 			int lastToRmove = 0;
-			for (int i = 0; i < runningProcs.size(); i++) {
+			for (unsigned int i = 0; i < runningProcs.size(); i++) {
 				runningProcs[i].run_time -= next_t;
 				if (runningProcs[i].run_time <= 0) {
 					++lastToRmove;
@@ -417,7 +424,7 @@ void Contiguous(vector<char> frames, vector<Process> inputProcs, int framesPerLi
 
 		if (!runningProcs.empty()) {
 			int lastToRmove = 0;
-			for (int i = 0; i < runningProcs.size(); i++) {
+			for (unsigned int i = 0; i < runningProcs.size(); i++) {
 				runningProcs[i].run_time -= next_t;
 				if (runningProcs[i].run_time <= 0) {
 					++lastToRmove;
@@ -443,13 +450,14 @@ void Contiguous(vector<char> frames, vector<Process> inputProcs, int framesPerLi
 						cout << "time " << t << "ms: Cannot place process " << p.ID << " -- starting defragmentation" << endl;
 						vector<char> moved;
 						int movedFrame = defrag(frames, moved);
+						recentIndex = 0;
 						int dTime = movedFrame * t_movetime;
 						t += dTime;
-						for (int i = 0; i < arrivalProcs.size(); i++) {
+						for (unsigned int i = 0; i < arrivalProcs.size(); i++) {
 							arrivalProcs[i].arr_time += dTime;
 						}
 						cout << "time " << t << "ms: Defragmentation complete (moved " << movedFrame << " frames:";
-						for (int i = 0; i < moved.size(); i++) {
+						for (unsigned int i = 0; i < moved.size(); i++) {
 							cout << " " << moved[i];
 							if (i != moved.size() - 1) {
 								cout << ",";
